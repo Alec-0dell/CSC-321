@@ -4,9 +4,13 @@ def plot_rsa_results(results):
     key_sizes = [512, 1024, 2048, 3072, 4096, 7680, 15360]
     sign_s = results['sign']
     verify_s = results['verify']
+    encr_s = results['encr']
+    decr_s = results['decr']
 
     plt.plot(key_sizes, sign_s, label='RSA Sign', marker='o')
     plt.plot(key_sizes, verify_s, label='RSA Verify', marker='o')
+    plt.plot(key_sizes, encr_s, label='RSA Encrypt', marker='o')
+    plt.plot(key_sizes, decr_s, label='RSA Verify', marker='o')
 
     plt.xlabel('RSA Key Size (bits)')
     plt.ylabel('Throughput (operations/s)')
