@@ -10,19 +10,19 @@ def main():
     key = os.urandom(16)
     iv = os.urandom(16)
 
-    user_input = "You're the man now, dog;admin=true;"
+    user_input = "AadminAtrueAYou're the man now, dog;admin=true;"
 
     ciphertext = submit(user_input, key, iv)
-    print(ciphertext)
-
-    tampered_ciphertext = tamper_ciphertext(ciphertext)
-    print("tampered", tampered_ciphertext, len(tampered_ciphertext))
+    
+    
+    is_admin_valid = verify(ciphertext, key, iv)
+    print("Admin Access Before Tamper:", is_admin_valid)
     
 
+    tampered_ciphertext = tamper_ciphertext(ciphertext)
+    
     is_admin_tamp = verify(tampered_ciphertext, key, iv)
-    is_admin_valid = verify(ciphertext, key, iv)
-
-    print("Admin Access Before Tamper:", is_admin_valid)
+    
     print("Admin Access After Tamper:", is_admin_tamp)
 
 
@@ -42,7 +42,7 @@ def submit(userdata, key, iv):
 
 def verify(ciphertext, key, iv):
     decrypted_data = Task1.cbc_decrypt(key, ciphertext, iv)
-    print(decrypted_data)
+    decrypted_data = decrypted_data[16:]
     try:
         unpadded_data = unpad(decrypted_data, AES.block_size)
     except ValueError:
@@ -54,34 +54,16 @@ def verify(ciphertext, key, iv):
     return ";admin=true;" in decoded_data
 
 
-# def tamper_ciphertext(ciphertext):
-#     # Target string to inject
-#     injection = ";admin=true;"
-#     injection_bytes = injection.encode('ascii')
-    
-#     out = b""
-
-#     blocks = Task1.create_blocks(ciphertext)
-#     out += blocks[0]
-#     blocks[1] = blocks[1][:4] + injection_bytes
-#     prev = Task1.xor_byte(blocks[0], blocks[1])
-#     out += prev 
-#     for i in blocks[2:]:
-#         xor = Task1.xor_byte(i, prev)
-#         out += xor
-#         prev = xor
-#     return out
 
 def tamper_ciphertext(ciphertext):
     # Convert ciphertext to mutable bytearray
     enc_list = bytearray(ciphertext)
 
     # Modify specific bytes using XOR operations
-    enc_list[4] ^= (ord("@") ^ ord(";"))  # Modify the 5th byte
-    enc_list[10] ^= (ord("$") ^ ord("="))  # Modify the 11th byte
-    enc_list[15] ^= (ord("*") ^ ord(";"))  # Modify the 16th byte
-
-    print( enc_list)
+    enc_list[4] ^= (ord("A") ^ ord(";"))
+    enc_list[10] ^= (ord("A") ^ ord("="))
+    enc_list[15] ^= (ord("A") ^ ord(";")) 
+    
     return bytes(enc_list)
 
 if __name__ == "__main__":
