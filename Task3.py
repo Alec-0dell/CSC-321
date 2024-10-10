@@ -17,7 +17,7 @@ def plot_rsa_results(results):
     plt.title('RSA Performance: Throughput vs Key Size')
     plt.legend()
     
-    plt.yscale('log')#optional log scale 
+    plt.yscale('log')
 
     plt.savefig('rsa_performance.png')
     plt.show()
@@ -37,7 +37,7 @@ def plot_aes_results(results):
     plt.title('AES Performance: Throughput vs Key Size')
     plt.legend()
     
-    plt.yscale('log') #optional log scale 
+    plt.yscale('log')
 
     plt.savefig('aes_performance.png')
     plt.show()
