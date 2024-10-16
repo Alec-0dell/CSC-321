@@ -2,6 +2,9 @@ import random
 from Crypto.Util import number
 
 def main():
+    # print out c and s prime for the grader
+    # sign the message and show that i can forge the digital signature
+    
     # RSA Key Generation (for Alice)
     bits = 512  # Reduced size for demonstration; you can use up to 2048 bits.
     public_key, private_key = generate_keypair(bits)
@@ -22,6 +25,7 @@ def main():
 
     # Bob decrypts Mallory's modified ciphertext (thinking it came from Alice)
     s_prime = decrypt(private_key, c_prime)
+    print("c_prime", c_prime, "s_prime", s_prime)
     print(f"Bob's decrypted value (s'): {s_prime}")
 
     # Mallory recovers the original message by reversing the attack
