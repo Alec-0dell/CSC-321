@@ -5,6 +5,7 @@ def main():
     # print out c and s prime for the grader
     # sign the message and show that i can forge the digital signature
     
+    
     # RSA Key Generation (for Alice)
     bits = 512  # Reduced size for demonstration; you can use up to 2048 bits.
     public_key, private_key = generate_keypair(bits)
@@ -21,20 +22,54 @@ def main():
     # Mallory performs a malleability attack by modifying the ciphertext
     factor = random.randint(2, public_key[0] - 1)
     c_prime = mitm_attack(public_key, c, factor)
-    print(f"Mallory's modified ciphertext: {c_prime}")
+    print(f"\nMallory's modified ciphertext: {c_prime}")
 
     # Bob decrypts Mallory's modified ciphertext (thinking it came from Alice)
     s_prime = decrypt(private_key, c_prime)
-    print("c_prime", c_prime, "s_prime", s_prime)
+    print("\nc_prime", c_prime, "\ns_prime", s_prime)
     print(f"Bob's decrypted value (s'): {s_prime}")
 
     # Mallory recovers the original message by reversing the attack
     s_mallory = mallory_recover_secret(s_prime, factor, public_key[0])
-    print(f"Mallory's recovered value (original message as integer): {s_mallory}")
+    print(f"\nMallory's recovered value (original message as integer): {s_mallory}")
 
     # Mallory converts the integer back to the original message
     recovered_message = int_to_string(s_mallory)
     print(f"Mallory's recovered message: {recovered_message}")
+    
+    
+     # Alice signs two messages
+    mes1 = "Hi Bob this is a signed message!"
+    mes2 = "Hi Bob this is another message that I have signed!"
+    m1 = string_to_int(mes1)  # Convert message1 to integer
+    m2 = string_to_int(mes2)  # Convert message2 to integer
+
+    print(f"\nAlice's original message1 (as integer): {m1}")
+    print(f"Alice's original message2 (as integer): {m2}")
+
+    # Alice creates digital signatures for both messages
+    s1 = sign(private_key, m1)
+    s2 = sign(private_key, m2)
+
+    print(f"\nAlice's 1st digital signature: {s1}")
+    print(f"Alice's 2nd digital signature: {s2}")
+
+    # Bob verifies both signatures
+    is1_valid = verify(public_key, m1, s1)
+    is2_valid = verify(public_key, m2, s2)
+    print(f"\nIs the 1st signature valid? {is1_valid}")
+    print(f"Is the 2nd signature valid? {is2_valid}")
+
+    # Mallory creates a forged message and signature
+    m3 = (m1 * m2) % public_key[0]  # n is public_key[0]
+    s3 = (s1 * s2) % public_key[0]  # Signature forged using multiplication
+
+    print(f"\nMallory's forged message (m3 = m1 * m2 mod n): {m3}")
+    print(f"Mallory's forged signature for m3: {s3}")
+
+    # Verify the forged signature
+    is_forged_valid = verify(public_key, m3, s3)
+    print(f"\nIs the forged signature valid? {is_forged_valid}")
     
 def generate_prime(bits):
     return number.getPrime(bits)
@@ -91,6 +126,16 @@ def mitm_attack(public_key, ciphertext, factor):
 def mallory_recover_secret(s_prime, factor, n):
     factor_inv = mod_inverse(factor, n)
     return (s_prime * factor_inv) % n
+
+# RSA signing
+def sign(private_key, message):
+    n, d = private_key
+    return pow(message, d, n)
+
+# Verify an RSA signature.
+def verify(public_key, message, signature):
+    n, e = public_key
+    return pow(signature, e, n) == message
 
 
 main()
