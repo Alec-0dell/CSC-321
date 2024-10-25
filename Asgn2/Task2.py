@@ -5,6 +5,8 @@ from Crypto.Hash import SHA256
 import os
 from Crypto.Util.Padding import pad
 from Crypto.Util.Padding import unpad
+from Crypto.Util.number import getPrime
+from Crypto.Random import get_random_bytes
 
 # Show that Mallory can recover the messages 𝑚0 and 𝑚1 from their ciphertexts by setting alpha to 1, q, or q-1.
 # enerate_private_key
@@ -22,8 +24,15 @@ from Crypto.Util.Padding import unpad
 # Mallory gets Alice's public key
 def main():
     # Capability to use large 1024 bit numbers:
-    test_q = "B10B8F96A080E01DDE92DE5EAE5D54EC52C99FBCFB06A3C69A6A9DCA52D23B616073E28675A23D189838EF1E2EE652C013ECB4AEA906112324975C3CD49B83BFACCBDD7D90C4BD7098488E9C219A73724EFFD6FAE5644738FAA31A4FF55BCCC0A151AF5F0DC8B4BD45BF37DF365C1A65E68CFDA76D4DA708DF1FB2BC2E4A4371"
-    test_alpha = "A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5"
+    #test_q = "B10B8F96A080E01DDE92DE5EAE5D54EC52C99FBCFB06A3C69A6A9DCA52D23B616073E28675A23D189838EF1E2EE652C013ECB4AEA906112324975C3CD49B83BFACCBDD7D90C4BD7098488E9C219A73724EFFD6FAE5644738FAA31A4FF55BCCC0A151AF5F0DC8B4BD45BF37DF365C1A65E68CFDA76D4DA708DF1FB2BC2E4A4371"
+    #test_alpha = "A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5"
+    nE, nD = generate_keypair(2048)
+    test_q = str(nE[0])
+    test_alpha = str(nD[1])
+    print("TQ", test_q)
+    print("\n",nD[1])
+    print("\nTA", test_alpha)
+
     real_num_q, real_num_alpha = parse_real_numbers(test_q, test_alpha)
     # print(real_num_q, real_num_alpha)
 
@@ -61,6 +70,37 @@ def main():
     mitm_generator_attack(real_num_q, real_num_alpha)
     return
 
+def mod_inverse(a, m):
+    """Compute the modular multiplicative inverse of a modulo m."""
+    g, x, _ = egcd(a, m)
+    if g != 1:
+        raise Exception('Modular inverse does not exist')
+    else:
+        return x % m
+    
+def egcd(a, b):
+    if a == 0:
+        return b, 0, 1
+    else:
+        g, y, x = egcd(b % a, a)
+        return g, x - (b // a) * y, y   
+    
+    
+def generate_prime(bits):
+    return getPrime(bits, randfunc=get_random_bytes)
+
+def generate_keypair(bits):
+    """Generate RSA public and private keys."""
+    p = generate_prime(bits // 2)
+    q = generate_prime(bits // 2)
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    e = 65537  # Requirement: Use the value e=65537
+    d = mod_inverse(e, phi)
+    d_check = pow(e, -1, phi)
+    #print(f"\nmod_inverse_check (d): {d}")
+    #print(f"pow (d_check): {d_check}\n")
+    return ((n, e), (n, d))
 
 def generate_private_key():
     return random.randint(10, 1000)
